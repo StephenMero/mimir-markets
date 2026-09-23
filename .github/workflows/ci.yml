@@ -33,6 +33,7 @@ jobs:
       - run: npm ci
       - run: npm audit --omit=dev --audit-level=high
       - run: npm run check:terms
+      - run: npm run check:locales
       - run: npm run typecheck
       - run: npm run test:contracts
       - run: cargo build --manifest-path contracts-soroban/Cargo.toml --release --target wasm32v1-none

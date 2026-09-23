@@ -724,7 +724,7 @@ npm run smoke:x402:http   # full HTTP round trip against a running dev server
 | LLM layer          | Routed language model layer                                                       | `lib/llm.ts` handles model calls, cooldowns, and fallback routing                                                  |
 | Messaging          | XMTP Browser SDK v7 (`@xmtp/browser-sdk`)                                         | Optional E2E-encrypted chat between creator and challenger before/after settlement                               |
 | Database           | Neon Postgres via `@neondatabase/serverless`                                      | Serverless-friendly driver, works on both Vercel functions and Railway long-running workers                      |
-| i18n               | next-intl (English only today)                                                    | Locale-prefixed routing (`/en/*`) with the plumbing in place; add a locale in `i18n/routing.ts` + `messages/`     |
+| i18n               | next-intl (English only today)                                                    | Locale-prefixed routing (`/en/*`) with the plumbing in place; add a locale in `i18n/routing.ts` + `messages/`, then run `npm run check:locales` — see [`docs/LOCALIZATION.md`](docs/LOCALIZATION.md) |
 | Frontend hosting   | Vercel                                                                            | Native Next.js, `iad1` region, 30s function timeout for /api routes                                              |
 | Worker hosting     | Railway                                                                           | Long-lived processes; `npm run workers` runs the oracle + market-creator + council with auto-restart              |
 
@@ -1051,6 +1051,8 @@ Every env var lives in `.env.example`. Quick reference:
 | `npm run build` / `npm start`                | Production build / serve                                                           |
 | `npm run typecheck`                          | `tsc --noEmit` across app, workers and scripts                                     |
 | `npm run check:terms`                        | Forbidden-terms lint (keeps pre-Stellar chain names and bespoke-402 residue out)   |
+| `npm run check:locales`                      | Locale completeness check — diffs every registered locale against `messages/en.json`; exits 1 on missing or funded-feature violations |
+| `npm run check:locales:strict`               | Same as above but also fails on extra (stale) keys not present in the English baseline |
 | `npm run test:contracts`                     | `cargo test --release` over `contracts-soroban`                                     |
 | `npm run workers`                            | Run all agent workers in parallel (Railway entry point: oracle + market-creator + council + sync + traders) |
 | `npm run oracle`                             | Run only the oracle (settler; optionally `AUTO_CHALLENGE=1`)                       |
