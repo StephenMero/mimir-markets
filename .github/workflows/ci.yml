@@ -37,4 +37,5 @@ jobs:
       - run: npm run test:contracts
       - run: cargo build --manifest-path contracts-soroban/Cargo.toml --release --target wasm32v1-none
       - run: npm run test:smoke
+      - run: npm run rollback:rehearsal
       - run: npm run build
