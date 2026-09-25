@@ -40,6 +40,11 @@ import {
   writeEnvLocal,
 } from "../scripts/lib/stellar-env";
 
+import {
+  formatProvenanceReport,
+  verifyRepoArtifactProvenance,
+} from "../lib/ops/artifact-provenance";
+
 const CONTRACTS_DIR = path.join(REPO_ROOT, "contracts-soroban");
 const WASM_DIR = path.join(CONTRACTS_DIR, "target", "wasm32v1-none", "release");
 
@@ -174,8 +179,9 @@ function resolveUsdcSac(deployerSecret: string): string {
   ]);
   if (Number(decimals) !== USDC_DECIMALS) {
     throw new Error(
-      `USDC SAC reports ${decimals} decimals but the contracts assume ${USDC_DECIMALS} ` +
-        `(MIN_STAKE in mimir-market/src/types.rs) — stop and reconcile before deploying`,
+      `USDC SAC reports ${decimals} decimals but the contracts require ${USDC_DECIMALS} ` +
+        `(USDC_DECIMALS in contracts-soroban/*/src/types.rs; initialize would reject it) — ` +
+        `stop and reconcile before deploying`,
     );
   }
   console.log(`    ✓ SAC ${sacId} live, decimals=${decimals}`);
@@ -279,6 +285,17 @@ async function main(): Promise<void> {
 
   buildContracts();
   assertWasmPresent();
+  {
+    const mode = process.env.MIMIR_REQUIRE_ARTIFACT_PROVENANCE === "1" ? "release" : "develop";
+    const provenance = verifyRepoArtifactProvenance({ mode, requireBuilt: true, repoRoot: REPO_ROOT });
+    console.log(formatProvenanceReport(provenance));
+    if (!provenance.ok) {
+      throw new Error(
+        "contract artifact provenance check failed — refuse to deploy mismatched or unverified Wasm " +
+          "(pin digests with npm run verify:artifacts -- --write-pins, or set MIMIR_REQUIRE_ARTIFACT_PROVENANCE=1 for release gating)",
+      );
+    }
+  }
   const usdcSac = resolveUsdcSac(deployerSecret);
 
   console.log("[3/5] deploying wasm…");
