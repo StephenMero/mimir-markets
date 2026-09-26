@@ -1134,7 +1134,7 @@ Every env var lives in `.env.example`. Quick reference:
 | `npm run deploy:contract`                    | Build, deploy and initialize the Soroban contracts on Stellar Testnet              |
 | `npm run verify:deployment`                  | Check the deployed contract ids, WASM hash and initialized config                  |
 | `npm run verify:artifacts`                   | Verify / pin Soroban Wasm digests against `deploy/contract-artifacts.manifest.json` (no secrets) |
-| `npm run verify:analytics`                   | Check the analytics gates the launch gate requires                                 |
+| `npm run verify:analytics`                   | Check exported analytics quality; privacy/release runbook: [`docs/ANALYTICS_PRIVACY.md`](./docs/ANALYTICS_PRIVACY.md) |
 | `npm run backup:read-index`                  | Dump the Neon read-index cache to a self-verified checksummed archive (`--out <path>` or stdout; needs `DATABASE_URL`, no seeds) |
 | `npm run verify:cache-backup`                | Verify a cache-backup archive offline — no `DATABASE_URL`, no network, byte-reproducible |
 | `npm run restore:read-index`                 | Restore a *verified* archive into the Neon read-index and fingerprint-check the result (`--dry-run` to preview) |
