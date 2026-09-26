@@ -763,7 +763,29 @@ fn an_unchallenged_claim_cannot_be_resolved() {
 }
 
 #[test]
-fn resolving_twice_is_rejected() {
+fn resolving_twice_with_same_inputs_is_idempotent() {
+    let f = Fixture::new(0, 0);
+    let creator = f.user(100 * USDC);
+    let c1 = f.user(100 * USDC);
+    let id = f.client().create_claim(&creator, &f.params(5 * USDC));
+    f.client().challenge_claim(&c1, &id, &(5 * USDC), &None);
+    f.advance_by(3_600);
+
+    // First call succeeds.
+    f.client()
+        .resolve_claim(&id, &WinnerSide::Draw, &f.str("a"), &1, &f.zero_hash());
+    
+    // Second call with exact same inputs succeeds without modifying state.
+    f.client()
+        .resolve_claim(&id, &WinnerSide::Draw, &f.str("a"), &1, &f.zero_hash());
+
+    let claim = f.client().get_claim(&id);
+    assert_eq!(claim.state, crate::types::ClaimState::Resolved);
+    assert_eq!(claim.winner_side, WinnerSide::Draw);
+}
+
+#[test]
+fn resolving_twice_with_different_inputs_is_rejected() {
     let f = Fixture::new(0, 0);
     let creator = f.user(100 * USDC);
     let c1 = f.user(100 * USDC);
@@ -775,7 +797,7 @@ fn resolving_twice_is_rejected() {
         .resolve_claim(&id, &WinnerSide::Draw, &f.str("a"), &1, &f.zero_hash());
     let err = f
         .client()
-        .try_resolve_claim(&id, &WinnerSide::Creator, &f.str("b"), &1, &f.zero_hash())
+        .try_resolve_claim(&id, &WinnerSide::Creator, &f.str("a"), &1, &f.zero_hash())
         .unwrap_err()
         .unwrap();
     assert_eq!(err, Error::ClaimNotActive);

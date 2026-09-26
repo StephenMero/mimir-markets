@@ -59,6 +59,15 @@ pub fn resolve_claim_versioned(
     storage::oracle(env)?.require_auth();
 
     let mut claim = storage::get_claim(env, claim_id)?;
+    if claim.state == ClaimState::Resolved {
+        if claim.winner_side == winner_side
+            && claim.resolution_summary == summary
+            && claim.confidence == confidence
+            && claim.evidence_hash == Some(evidence_hash.clone())
+        {
+            return Ok(());
+        }
+    }
     if claim.state != ClaimState::Active {
         return Err(Error::ClaimNotActive);
     }
